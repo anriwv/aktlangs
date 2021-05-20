@@ -1,0 +1,44 @@
+plugins {
+    id 'java'
+    id 'antlr'
+    id 'idea'
+}
+
+compileJava.options.encoding = 'utf-8'
+compileTestJava.options.encoding = 'utf-8'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation group: 'com.google.guava', name: 'guava', version: '30.1-jre'
+    implementation group: 'guru.nidi', name: 'graphviz-java-all-j2v8', version: '0.18.0'
+    implementation group: 'ch.qos.logback', name: 'logback-classic', version: '1.2.3'
+    implementation group: 'org.apache.commons', name: 'commons-text', version: '1.9'
+    antlr group: 'org.antlr', name: 'antlr4', version: '4.9.2'
+
+    testImplementation group: 'junit', name: 'junit', version: '4.13.1'
+}
+
+// ANTLR
+ext.antlr = [
+    destinationDir: 'src/gen/java'
+]
+
+generateGrammarSource {
+    outputDirectory = file(antlr.destinationDir)
+    arguments += ['-visitor']
+}
+
+sourceSets {
+    main.java.srcDir antlr.destinationDir
+}
+
+idea {
+    module.generatedSourceDirs += file(antlr.destinationDir)
+}
+
+clean {
+    delete antlr.destinationDir
+}
