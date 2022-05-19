@@ -63,49 +63,20 @@ public class CMaInterpreter {
                     rhs = stack.pop();
                     lhs = stack.pop();
                     switch (basicInstruction.getCode()) {
-                        case ADD:
-                            stack.push(lhs + rhs);
-                            break;
-                        case SUB:
-                            stack.push(lhs - rhs);
-                            break;
-                        case MUL:
-                            stack.push(lhs * rhs);
-                            break;
-                        case DIV:
-                            stack.push(lhs / rhs);
-                            break;
-                        case MOD:
-                            stack.push(lhs % rhs);
-                            break;
-                        case AND:
-                            stack.push(lhs & rhs);
-                            break;
-                        case OR:
-                            stack.push(lhs | rhs);
-                            break;
-                        case XOR:
-                            stack.push(lhs ^ rhs);
-                            break;
-                        case EQ:
-                            stack.push(CMaUtils.bool2int(lhs == rhs));
-                            break;
-                        case NEQ:
-                            stack.push(CMaUtils.bool2int(lhs != rhs));
-                            break;
-                        case LE:
-                            stack.push(CMaUtils.bool2int(lhs < rhs));
-                            break;
-                        case LEQ:
-                            stack.push(CMaUtils.bool2int(lhs <= rhs));
-                            break;
-                        case GE:
-                        case GR:
-                            stack.push(CMaUtils.bool2int(lhs > rhs));
-                            break;
-                        case GEQ:
-                            stack.push(CMaUtils.bool2int(lhs >= rhs));
-                            break;
+                        case ADD -> stack.push(lhs + rhs);
+                        case SUB -> stack.push(lhs - rhs);
+                        case MUL -> stack.push(lhs * rhs);
+                        case DIV -> stack.push(lhs / rhs);
+                        case MOD -> stack.push(lhs % rhs);
+                        case AND -> stack.push(lhs & rhs);
+                        case OR -> stack.push(lhs | rhs);
+                        case XOR -> stack.push(lhs ^ rhs);
+                        case EQ -> stack.push(CMaUtils.bool2int(lhs == rhs));
+                        case NEQ -> stack.push(CMaUtils.bool2int(lhs != rhs));
+                        case LE -> stack.push(CMaUtils.bool2int(lhs < rhs));
+                        case LEQ -> stack.push(CMaUtils.bool2int(lhs <= rhs));
+                        case GE, GR -> stack.push(CMaUtils.bool2int(lhs > rhs));
+                        case GEQ -> stack.push(CMaUtils.bool2int(lhs >= rhs));
                     }
                     break;
                 case NEG:

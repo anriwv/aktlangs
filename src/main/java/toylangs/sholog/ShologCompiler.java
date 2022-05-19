@@ -59,17 +59,10 @@ public class ShologCompiler {
                 visit(eager.getLeft());
                 visit(eager.getRight());
                 switch (eager.getOp()) {
-                    case And:
-                        pw.visit(AND);
-                        break;
-                    case Or:
-                        pw.visit(OR);
-                        break;
-                    case Xor:
-                        pw.visit(XOR);
-                        break;
-                    default:
-                        throw new UnsupportedOperationException("unknown eager op");
+                    case And -> pw.visit(AND);
+                    case Or -> pw.visit(OR);
+                    case Xor -> pw.visit(XOR);
+                    default -> throw new UnsupportedOperationException("unknown eager op");
                 }
                 return null;
             }

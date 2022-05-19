@@ -54,29 +54,20 @@ public class ShologEvaluator {
             protected Boolean visit(ShologEager eager) {
                 boolean left = visit(eager.getLeft());
                 boolean right = visit(eager.getRight());
-                switch (eager.getOp()) {
-                    case And:
-                        return left && right;
-                    case Or:
-                        return left || right;
-                    case Xor:
-                        return left ^ right;
-                    default:
-                        throw new UnsupportedOperationException("unknown eager op");
-                }
+                return switch (eager.getOp()) {
+                    case And -> left && right;
+                    case Or -> left || right;
+                    case Xor -> left ^ right;
+                };
             }
 
             @Override
             protected Boolean visit(ShologLazy lazy) {
                 boolean left = visit(lazy.getLeft());
-                switch (lazy.getOp()) {
-                    case And:
-                        return left && visit(lazy.getRight());
-                    case Or:
-                        return left || visit(lazy.getRight());
-                    default:
-                        throw new UnsupportedOperationException("unknown lazy op");
-                }
+                return switch (lazy.getOp()) {
+                    case And -> left && visit(lazy.getRight());
+                    case Or -> left || visit(lazy.getRight());
+                };
             }
         }.visit(node);
     }
