@@ -1,25 +1,30 @@
 plugins {
     id 'java'
-    id 'org.jetbrains.kotlin.jvm' version '1.6.10'
+    id 'org.jetbrains.kotlin.jvm' version '2.3.0'
     id 'antlr'
     id 'idea'
 }
 
 compileJava.options.encoding = 'utf-8'
 compileTestJava.options.encoding = 'utf-8'
+java.sourceCompatibility = JavaVersion.VERSION_25
+
+kotlin {
+    jvmToolchain(25)
+}
 
 repositories {
     mavenCentral()
 }
 
 dependencies {
-    implementation group: 'com.google.guava', name: 'guava', version: '31.0.1-jre'
-    implementation group: 'guru.nidi', name: 'graphviz-java-all-j2v8', version: '0.18.1'
-    implementation group: 'ch.qos.logback', name: 'logback-classic', version: '1.2.10'
-    implementation group: 'org.apache.commons', name: 'commons-text', version: '1.9'
-    antlr group: 'org.antlr', name: 'antlr4', version: '4.10.1'
+    implementation 'com.google.guava:guava:33.5.0-jre'
+    implementation 'guru.nidi:graphviz-java-all-j2v8:0.18.1'
+    implementation 'ch.qos.logback:logback-classic:1.5.32'
+    implementation 'org.apache.commons:commons-text:1.15.0'
+    antlr 'org.antlr:antlr4:4.13.2'
 
-    testImplementation group: 'junit', name: 'junit', version: '4.13.2'
+    testImplementation 'junit:junit:4.13.2'
 }
 
 // ANTLR
@@ -29,7 +34,7 @@ ext.antlr = [
 
 generateGrammarSource {
     outputDirectory = file(antlr.destinationDir)
-    arguments += ['-visitor']
+    arguments += ['-visitor', '-encoding', 'utf-8']
 }
 
 sourceSets {
@@ -46,4 +51,8 @@ clean {
 
 compileKotlin {
     dependsOn(generateGrammarSource)
+}
+
+compileTestKotlin {
+    dependsOn(generateTestGrammarSource)
 }
