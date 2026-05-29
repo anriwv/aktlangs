@@ -191,7 +191,7 @@ public class ShologAstTest {
         try {
             ShologAst.makeShologAst(input);
             fail("expected parse error: " + input);
-        } catch (Exception ignored) {
+        } catch (Exception _) {
 
         }
     }

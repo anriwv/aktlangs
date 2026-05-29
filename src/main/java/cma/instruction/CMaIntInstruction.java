@@ -1,6 +1,6 @@
 package cma.instruction;
 
-public class CMaIntInstruction extends CMaInstruction<CMaIntInstruction.Code> {
+public record CMaIntInstruction(Code code, int arg) implements CMaInstruction<CMaIntInstruction.Code> {
 
     public enum Code {
         //@formatter:off
@@ -13,22 +13,6 @@ public class CMaIntInstruction extends CMaInstruction<CMaIntInstruction.Code> {
         /** salvesta väärtus indeksile */
         STOREA,
         //@formatter:on
-    }
-
-    private final int arg;
-
-    public CMaIntInstruction(Code code, int arg) {
-        super(code);
-        this.arg = arg;
-    }
-
-    public int getArg() {
-        return arg;
-    }
-
-    @Override
-    public void accept(CMaInstructionVisitor visitor) {
-        visitor.visit(this);
     }
 
     @Override

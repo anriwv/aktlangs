@@ -19,66 +19,59 @@ public class ShologCompiler {
      */
     private static final int UNDEFINED_CODE = 127;
 
+    private final CMaProgramWriter pw = new CMaProgramWriter();
+    private final List<String> variables;
+
+    public ShologCompiler(List<String> variables) {
+        this.variables = variables;
+    }
 
     public static CMaProgram compile(ShologNode node, List<String> variables) {
-        CMaProgramWriter pw = new CMaProgramWriter();
+        ShologCompiler shologCompiler = new ShologCompiler(variables);
+        shologCompiler.compile(node);
+        return shologCompiler.pw.toProgram();
+    }
 
-        new ShologAstVisitor<Void>() {
-            @Override
-            protected Void visit(ShologLit lit) {
-                pw.visit(LOADC, CMaUtils.bool2int(lit.getValue()));
-                return null;
-            }
+    /**
+     * Viska CMa-s erind kokkulepitud viisil.
+     */
+    private void compileThrow(int code) {
+        pw.visit(LOADC, -code);
+        pw.visit(HALT);
+    }
 
-            @Override
-            protected Void visit(ShologVar var) {
-                int variableIndex = variables.indexOf(var.getName());
+    private void compile(ShologNode node) {
+        switch (node) {
+            case ShologLit(boolean value) -> pw.visit(LOADC, CMaUtils.bool2int(value));
+            case ShologVar(String name) -> {
+                int variableIndex = variables.indexOf(name);
                 if (variableIndex < 0)
-                    visitThrow(UNDEFINED_CODE);
+                    compileThrow(UNDEFINED_CODE);
                 else
                     pw.visit(LOADA, variableIndex);
-                return null;
             }
-
-            /**
-             * Viska CMa-s erind kokkulepitud viisil.
-             */
-            private void visitThrow(int code) {
-                pw.visit(LOADC, -code);
-                pw.visit(HALT);
-            }
-
-            @Override
-            protected Void visit(ShologError error) {
-                visitThrow(error.getCode());
-                return null;
-            }
-
-            @Override
-            protected Void visit(ShologEager eager) {
-                visit(eager.getLeft());
-                visit(eager.getRight());
-                switch (eager.getOp()) {
+            case ShologError(int code) -> compileThrow(code);
+            case ShologEager(ShologEager.Op op, ShologNode left, ShologNode right) -> {
+                compile(left);
+                compile(right);
+                switch (op) {
                     case And -> pw.visit(AND);
                     case Or -> pw.visit(OR);
                     case Xor -> pw.visit(XOR);
                     default -> throw new UnsupportedOperationException("unknown eager op");
                 }
-                return null;
             }
-
-            @Override
-            protected Void visit(ShologLazy lazy) {
-                visit(lazy.getLeft());
+            case ShologLazy(ShologLazy.Op op, ShologNode left, ShologNode right) -> {
+                compile(left);
                 CMaLabel shortCircuit = new CMaLabel();
 
                 pw.visit(DUP); // duubelda vasaku argumendi väärtus
-                switch (lazy.getOp()) {
+                switch (op) {
                     case And:
                         // kasuta pealmist vasaku argumendi väärtust kontrolliks
                         pw.visit(JUMPZ, shortCircuit);
                         // kasuta alumist vasaku argumendi väärtust tehteks
-                        visit(lazy.getRight());
+                        compile(right);
                         pw.visit(AND);
                         break;
                     case Or:
@@ -86,7 +79,7 @@ public class ShologCompiler {
                         pw.visit(NOT);
                         pw.visit(JUMPZ, shortCircuit);
                         // kasuta alumist vasaku argumendi väärtust tehteks
-                        visit(lazy.getRight());
+                        compile(right);
                         pw.visit(OR);
                         break;
                     default:
@@ -95,10 +88,7 @@ public class ShologCompiler {
 
                 pw.visit(shortCircuit);
                 // short-circuit korral kasuta alumist vasaku argumendi väärtust otse
-                return null;
             }
-        }.visit(node);
-
-        return pw.toProgram();
+        }
     }
 }

@@ -1,7 +1,8 @@
 package toylangs.sholog.ast;
 
-public class ShologEager extends ShologBinary {
+import java.util.List;
 
+public record ShologEager(Op op, ShologNode left, ShologNode right) implements ShologBinary {
     public enum Op {
         And("eand"),
         Or("eor"),
@@ -14,24 +15,21 @@ public class ShologEager extends ShologBinary {
         }
     }
 
-    private final Op op;
-
-    public ShologEager(Op op, ShologNode left, ShologNode right) {
-        super(left, right);
-        this.op = op;
-    }
-
-    public Op getOp() {
-        return op;
+    @Override
+    public List<Object> getChildren() {
+        return List.of(left, right);
     }
 
     @Override
-    protected Object getNodeInfo() {
+    public String getNodeLabel() {
         return op.nodeInfo;
     }
 
     @Override
-    public <T> T accept(ShologAstVisitor<T> visitor) {
-        return visitor.visit(this);
+    public String toString() {
+        return  op.nodeInfo + "(" +
+                "" + left +
+                ", " + right +
+                ")";
     }
 }

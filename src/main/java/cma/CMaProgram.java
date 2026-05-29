@@ -8,23 +8,7 @@ import java.nio.file.Path;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class CMaProgram {
-
-    private final List<CMaInstruction<?>> instructions;
-    private final Map<CMaLabel, Integer> labels;
-
-    public CMaProgram(List<CMaInstruction<?>> instructions, Map<CMaLabel, Integer> labels) {
-        this.instructions = instructions;
-        this.labels = labels;
-    }
-
-    public List<CMaInstruction<?>> getInstructions() {
-        return instructions;
-    }
-
-    public Map<CMaLabel, Integer> getLabels() {
-        return labels;
-    }
+public record CMaProgram(List<CMaInstruction<?>> instructions, Map<CMaLabel, Integer> labels) {
 
     @Override
     public String toString() {

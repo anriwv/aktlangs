@@ -7,53 +7,37 @@ import java.util.Map;
 public class SafdiEvaluator {
 
     public static class SafdiException extends RuntimeException {
-
     }
 
+    private final Map<String, Integer> env;
+
+    private SafdiEvaluator(Map<String, Integer> env) {
+        this.env = env;
+    }
 
     public static int eval(SafdiNode node, Map<String, Integer> env) {
-        return new SafdiAstVisitor<Integer>() {
-            @Override
-            protected Integer visit(SafdiNum num) {
-                return num.getValue();
-            }
+        SafdiEvaluator safdiEvaluator = new SafdiEvaluator(env);
+        return safdiEvaluator.evalNode(node);
+    }
 
-            @Override
-            protected Integer visit(SafdiVar var) {
-                Integer value = env.get(var.getName());
-                if (value == null)
-                    throw new SafdiException();
-                else
-                    return value;
+    private int evalNode(SafdiNode node) {
+        return switch (node) {
+            case SafdiNum(int value) -> value;
+            case SafdiVar(String name) -> {
+                Integer value = env.get(name);
+                if (value == null) throw new SafdiException();
+                else yield value;
             }
-
-            @Override
-            protected Integer visit(SafdiNeg neg) {
-                return -visit(neg.getExpr());
+            case SafdiNeg(SafdiNode expr) -> -evalNode(expr);
+            case SafdiAdd(SafdiNode left, SafdiNode right) -> evalNode(left) + evalNode(right);
+            case SafdiMul(SafdiNode left, SafdiNode right) -> evalNode(left) * evalNode(right);
+            case SafdiDiv(SafdiNode left, SafdiNode right, SafdiNode recover) -> {
+                int rightValue = evalNode(right);
+                if (rightValue == 0) {
+                    if (recover != null) yield evalNode(recover);
+                    else throw new SafdiException();
+                } else yield evalNode(left) / rightValue;
             }
-
-            @Override
-            protected Integer visit(SafdiAdd add) {
-                return visit(add.getLeft()) + visit(add.getRight());
-            }
-
-            @Override
-            protected Integer visit(SafdiMul mul) {
-                return visit(mul.getLeft()) * visit(mul.getRight());
-            }
-
-            @Override
-            protected Integer visit(SafdiDiv div) {
-                int right = visit(div.getRight());
-                if (right == 0) {
-                    if (div.getRecover() != null)
-                        return visit(div.getRecover());
-                    else
-                        throw new SafdiException();
-                }
-                else
-                    return visit(div.getLeft()) / right;
-            }
-        }.visit(node);
+        };
     }
 }

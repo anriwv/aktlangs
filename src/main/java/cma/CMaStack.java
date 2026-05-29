@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 import static cma.instruction.CMaIntInstruction.Code.LOADC;
 
@@ -25,7 +24,7 @@ public class CMaStack {
     }
 
     public CMaStack(int... data) {
-        this(Arrays.stream(data).boxed().collect(Collectors.toList()));
+        this(Arrays.stream(data).boxed().toList());
     }
 
     public void push(int value) {
@@ -33,12 +32,12 @@ public class CMaStack {
     }
 
     public int peek() {
-        return data.get(data.size() - 1);
+        return data.getLast();
     }
 
     public int pop() {
         int value = peek();
-        data.remove(data.size() - 1);
+        data.removeLast();
         return value;
     }
 
@@ -48,6 +47,10 @@ public class CMaStack {
 
     public int get(int index) {
         return data.get(index);
+    }
+
+    public int size() {
+        return data.size();
     }
 
     @Override

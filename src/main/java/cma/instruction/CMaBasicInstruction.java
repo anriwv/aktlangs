@@ -1,6 +1,6 @@
 package cma.instruction;
 
-public class CMaBasicInstruction extends CMaInstruction<CMaBasicInstruction.Code> {
+public record CMaBasicInstruction(Code code) implements CMaInstruction<CMaBasicInstruction.Code> {
 
     public enum Code {
         //@formatter:off
@@ -38,15 +38,6 @@ public class CMaBasicInstruction extends CMaInstruction<CMaBasicInstruction.Code
         /** seiska programm */
         HALT,
         //@formatter:on
-    }
-
-    public CMaBasicInstruction(Code code) {
-        super(code);
-    }
-
-    @Override
-    public void accept(CMaInstructionVisitor visitor) {
-        visitor.visit(this);
     }
 
     @Override

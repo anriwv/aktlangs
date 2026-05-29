@@ -143,7 +143,7 @@ public class SafdiAstTest {
         try {
             SafdiAst.makeSafdiAst(input);
             fail("expected parse error: " + input);
-        } catch (Exception ignored) {
+        } catch (Exception _) {
 
         }
     }

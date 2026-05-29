@@ -14,84 +14,72 @@ import static cma.instruction.CMaLabelInstruction.Code.JUMP;
 import static cma.instruction.CMaLabelInstruction.Code.JUMPZ;
 
 public class SafdiCompiler {
+    private final CMaProgramWriter pw = new CMaProgramWriter();
+    private final List<String> variables;
+
+    public SafdiCompiler(List<String> variables) {
+        this.variables = variables;
+    }
 
     public static CMaProgram compile(SafdiNode node, List<String> variables) {
-        CMaProgramWriter pw = new CMaProgramWriter();
+        SafdiCompiler safdiCompiler = new SafdiCompiler(variables);
+        safdiCompiler.compile(node);
+        return safdiCompiler.pw.toProgram();
+    }
 
-        new SafdiAstVisitor<Void>() {
-            @Override
-            protected Void visit(SafdiNum num) {
-                pw.visit(LOADC, num.getValue());
-                return null;
-            }
+    /**
+     * Viska CMa-s erind kokkulepitud viisil.
+     */
+    private void compileThrow() {
+        pw.visit(HALT);
+    }
 
-            @Override
-            protected Void visit(SafdiVar var) {
-                int variableIndex = variables.indexOf(var.getName());
+    private void compile(SafdiNode node) {
+        switch (node) {
+            case SafdiNum(int value) -> pw.visit(LOADC, value);
+            case SafdiVar(String name) -> {
+                int variableIndex = variables.indexOf(name);
                 if (variableIndex < 0)
-                    visitThrow();
+                    compileThrow();
                 else
                     pw.visit(LOADA, variableIndex);
-                return null;
             }
-
-            /**
-             * Viska CMa-s erind kokkulepitud viisil.
-             */
-            private void visitThrow() {
-                pw.visit(HALT);
-            }
-
-            @Override
-            protected Void visit(SafdiNeg neg) {
-                visit(neg.getExpr());
+            case SafdiNeg(SafdiNode expr) -> {
+                compile(expr);
                 pw.visit(NEG);
-                return null;
             }
-
-            @Override
-            protected Void visit(SafdiAdd add) {
-                visit(add.getLeft());
-                visit(add.getRight());
+            case SafdiAdd(SafdiNode left, SafdiNode right) -> {
+                compile(left);
+                compile(right);
                 pw.visit(ADD);
-                return null;
             }
-
-            @Override
-            protected Void visit(SafdiMul mul) {
-                visit(mul.getLeft());
-                visit(mul.getRight());
+            case SafdiMul(SafdiNode left, SafdiNode right) -> {
+                compile(left);
+                compile(right);
                 pw.visit(MUL);
-                return null;
             }
-
-            @Override
-            protected Void visit(SafdiDiv div) {
+            case SafdiDiv(SafdiNode left, SafdiNode right, SafdiNode recover) -> {
                 // jagaja kontroll
-                visit(div.getRight());
+                compile(right);
                 CMaLabel zeroDiv = new CMaLabel();
                 pw.visit(JUMPZ, zeroDiv);
 
                 // tavaline jagamine
-                visit(div.getLeft());
-                visit(div.getRight()); // ei saa DUP kasutada, sest DIV järjekord vastupidine
+                compile(left);
+                compile(right); // ei saa DUP kasutada, sest DIV järjekord vastupidine
                 pw.visit(DIV);
                 CMaLabel end = new CMaLabel();
                 pw.visit(JUMP, end);
 
                 // nulliga jagamine
                 pw.visit(zeroDiv);
-                if (div.getRecover() != null)
-                    visit(div.getRecover());
+                if (recover != null)
+                    compile(recover);
                 else
-                    visitThrow();
+                    compileThrow();
 
                 pw.visit(end);
-                return null;
             }
-
-        }.visit(node);
-
-        return pw.toProgram();
+        }
     }
 }

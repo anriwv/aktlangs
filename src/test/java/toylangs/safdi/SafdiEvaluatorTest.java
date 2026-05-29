@@ -115,7 +115,7 @@ public class SafdiEvaluatorTest {
             SafdiEvaluator.eval(node, env);
             fail("expected SafdiException");
         }
-        catch (SafdiEvaluator.SafdiException ignored) {
+        catch (SafdiEvaluator.SafdiException _) {
 
         }
     }
